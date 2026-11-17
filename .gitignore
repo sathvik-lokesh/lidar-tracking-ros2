@@ -1,0 +1,10 @@
+# Argoverse 2 data: CC BY-NC-SA 4.0, must not be redistributed; re-fetch with scripts/fetch_av2.py
+data/
+# local agent notes, never published
+P2_NOTES.md
+# colcon / build outputs
+build/
+install/
+log/
+__pycache__/
+.venv/
