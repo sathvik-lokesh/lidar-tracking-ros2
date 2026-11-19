@@ -25,6 +25,8 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <iterator>
+#include <vector>
 #include <map>
 #include <string>
 
@@ -43,6 +45,7 @@ struct AllParams
 {
   DetectorParams det;
   TrackerParams trk;
+  std::string ground_mask_dir;  // map-ground oracle masks (scripts/oracle_ground_masks.py)
 };
 
 using Setter = std::function<void (AllParams &, const std::string &)>;
@@ -72,6 +75,7 @@ std::map<std::string, Setter> param_setters()
     {"max_clearance_m", num([](AllParams & p, double v) {p.det.max_clearance_m = v;})},
     {"min_box_width_m", num([](AllParams & p, double v) {p.det.min_box_width_m = v;})},
     {"min_box_height_m", num([](AllParams & p, double v) {p.det.min_box_height_m = v;})},
+    {"ground_mask_dir", [](AllParams & p, const std::string & v) {p.ground_mask_dir = v; p.det.ground_method = 1;}},
     {"tracker", [](AllParams & p, const std::string & v) {
         if (v == "none") {p.trk.mode = TrackerParams::Mode::None;} else if (v == "nn") {
           p.trk.mode = TrackerParams::Mode::Nearest;
@@ -110,7 +114,8 @@ void write_params(std::ostream & os, const AllParams & a)
      << "\nmax_clearance_m=" << p.max_clearance_m << "\nmin_box_width_m=" << p.min_box_width_m
      << "\ntracker=" << mode_name(t.mode) << "\ngate_m=" << t.gate_m << "\nmin_hits=" << t.min_hits
      << "\nmax_misses=" << t.max_misses << "\naccel_std=" << t.accel_std << "\nmeas_std_m=" << t.meas_std_m
-     << "\noutput_filtered=" << t.output_filtered << "\n";
+     << "\noutput_filtered=" << t.output_filtered << "\nground_method=" << p.ground_method
+     << "\nground_mask_dir=" << a.ground_mask_dir << "\n";
 }
 
 int64_t to_ns(const builtin_interfaces::msg::Time & t)
@@ -192,8 +197,26 @@ int main(int argc, char ** argv)
       return 1;
     }
 
+    auto points = lidar_tracking::from_cloud2(cloud);
+    if (!params.ground_mask_dir.empty()) {
+      const auto log_id = std::filesystem::path(bag_dir).lexically_normal().filename().string().empty() ?
+        std::filesystem::path(bag_dir).lexically_normal().parent_path().filename().string() :
+        std::filesystem::path(bag_dir).lexically_normal().filename().string();
+      const auto mask_path = std::filesystem::path(params.ground_mask_dir) / log_id / (std::to_string(stamp) + ".bin");
+      std::ifstream mf(mask_path, std::ios::binary);
+      std::vector<char> mask((std::istreambuf_iterator<char>(mf)), std::istreambuf_iterator<char>());
+      if (mask.size() != points.size()) {
+        std::cerr << "mask " << mask_path << " has " << mask.size() << " entries, cloud has " << points.size() << "\n";
+        return 1;
+      }
+      std::vector<lidar_tracking::Point> kept;
+      for (size_t i = 0; i < points.size(); ++i) {
+        if (mask[i]) {kept.push_back(points[i]);}
+      }
+      points.swap(kept);
+    }
     lidar_tracking::StageTimings t;
-    const auto boxes = detector.detect(lidar_tracking::from_cloud2(cloud), &t);
+    const auto boxes = detector.detect(points, &t);
     const auto t0 = std::chrono::steady_clock::now();
     const auto tracks = tracker.update(boxes, ego, static_cast<double>(stamp) * 1e-9);
     const double track_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();

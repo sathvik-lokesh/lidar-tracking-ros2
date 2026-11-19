@@ -95,7 +95,16 @@ std::vector<Box> Detector::detect(const std::vector<Point> & cloud, StageTimings
   t.n_in = static_cast<int>(cloud.size());
 
   auto t0 = Clock::now();
-  const std::vector<Point> above = remove_ground(cloud);
+  std::vector<Point> above;
+  if (params_.ground_method == 1) {
+    const double r2 = params_.max_range_m * params_.max_range_m;
+    for (const auto & p : cloud) {
+      if (static_cast<double>(p.x) * p.x + static_cast<double>(p.y) * p.y <= r2) {above.push_back(p);}
+    }
+    ground_n_ = 0;  // no ground grid: clearance is reported as 0
+  } else {
+    above = remove_ground(cloud);
+  }
   t.ground_ms = ms_since(t0);
   t.n_nonground = static_cast<int>(above.size());
 

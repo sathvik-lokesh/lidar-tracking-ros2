@@ -40,6 +40,9 @@ struct DetectorParams
   // Ground removal: per-cell minimum z on a BEV grid, then the ground height of a
   // cell is the minimum over a (2k+1)x(2k+1) neighbourhood, so cells fully covered
   // by a vehicle still see the road beside it.
+  // 0 = grid ground removal below; 1 = none (input already ground-filtered, e.g. by the
+  //     map-ground oracle in process_bag; only the range crop is applied).
+  int ground_method{0};
   double ground_cell_m{1.0};
   int ground_neighbourhood{2};  // k: 2 -> 5x5 cells
   double ground_clearance_m{0.25};  // points lower than ground + this are ground
