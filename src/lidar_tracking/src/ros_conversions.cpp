@@ -61,4 +61,24 @@ vision_msgs::msg::Detection3DArray to_detection_array(
   return arr;
 }
 
+std::vector<Box> from_detection_array(const vision_msgs::msg::Detection3DArray & arr)
+{
+  std::vector<Box> out;
+  out.reserve(arr.detections.size());
+  for (const auto & d : arr.detections) {
+    Box b;
+    const auto & c = d.bbox.center;
+    b.cx = c.position.x;
+    b.cy = c.position.y;
+    b.cz = c.position.z;
+    const auto & q = c.orientation;
+    b.yaw = std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+    b.length = d.bbox.size.x;
+    b.width = d.bbox.size.y;
+    b.height = d.bbox.size.z;
+    out.push_back(b);
+  }
+  return out;
+}
+
 }  // namespace lidar_tracking

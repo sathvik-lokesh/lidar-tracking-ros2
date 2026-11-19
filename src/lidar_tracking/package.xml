@@ -18,6 +18,8 @@
   <depend>tf2_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>message_filters</depend>
+  <depend>diagnostic_msgs</depend>
+  <exec_depend>launch_ros</exec_depend>
   <depend>eigen</depend>
   <depend>libpcl-all-dev</depend>
 

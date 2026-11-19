@@ -21,4 +21,7 @@ vision_msgs::msg::Detection3DArray to_detection_array(
   const std::vector<Box> & boxes, const std_msgs::msg::Header & header,
   const std::vector<std::string> & ids = {});
 
+// Inverse of to_detection_array (yaw from the bbox orientation, ids from Detection3D::id).
+std::vector<Box> from_detection_array(const vision_msgs::msg::Detection3DArray & arr);
+
 }  // namespace lidar_tracking

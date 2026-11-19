@@ -29,6 +29,7 @@
 #include <string>
 
 #include "lidar_tracking/detector.hpp"
+#include "lidar_tracking/monitor.hpp"
 #include "lidar_tracking/ros_conversions.hpp"
 #include "lidar_tracking/tracker.hpp"
 
@@ -149,11 +150,12 @@ int main(int argc, char ** argv)
   }
   std::ofstream det(out_dir / "detections.csv");
   std::ofstream tim(out_dir / "timings.csv");
-  det << "stamp_ns,track_id,cx,cy,cz,length,width,height,yaw,num_points,hits,clearance\n";
+  det << "stamp_ns,track_id,cx,cy,cz,length,width,height,yaw,num_points,hits,clearance,flags\n";
   tim << "stamp_ns,n_in,n_nonground,n_voxel,n_clusters,n_boxes,n_out,ground_ms,voxel_ms,cluster_ms,fit_ms,detect_ms,track_ms\n";
 
   lidar_tracking::Detector detector(params.det);
   lidar_tracking::Tracker tracker(params.trk);
+  lidar_tracking::TrackMonitor monitor;  // a-priori thresholds, see monitor.hpp
   rosbag2_cpp::Reader reader;
   reader.open(bag_dir);
   rclcpp::Serialization<sensor_msgs::msg::PointCloud2> cloud_ser;
@@ -196,12 +198,14 @@ int main(int argc, char ** argv)
     const auto tracks = tracker.update(boxes, ego, static_cast<double>(stamp) * 1e-9);
     const double track_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
 
-    for (const auto & o : tracks) {
+    const auto flags = monitor.check(tracks, ego, static_cast<double>(stamp) * 1e-9);
+    for (size_t k = 0; k < tracks.size(); ++k) {
+      const auto & o = tracks[k];
       const auto & b = o.box;
       std::snprintf(
-        buf, sizeof(buf), "%lld,%lld,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.5f,%d,%d,%.3f\n",
+        buf, sizeof(buf), "%lld,%lld,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.5f,%d,%d,%.3f,%d\n",
         static_cast<long long>(stamp), static_cast<long long>(o.id),
-        b.cx, b.cy, b.cz, b.length, b.width, b.height, b.yaw, b.num_points, o.hits, b.clearance);
+        b.cx, b.cy, b.cz, b.length, b.width, b.height, b.yaw, b.num_points, o.hits, b.clearance, flags[k]);
       det << buf;
     }
     std::snprintf(
@@ -213,7 +217,8 @@ int main(int argc, char ** argv)
     n_out_total += static_cast<int64_t>(tracks.size());
     total_ms += t.total_ms + track_ms;
   }
-  std::cout << "frames=" << frames << " outputs=" << n_out_total
+  const auto & mc = monitor.counts();
+  std::cout << "frames=" << frames << " outputs=" << n_out_total << " monitor_flags=" << mc.any
             << " mean_ms=" << (frames ? total_ms / frames : 0.0) << "\n";
   return frames > 0 ? 0 : 1;
 }
