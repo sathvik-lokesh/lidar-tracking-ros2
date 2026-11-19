@@ -6,4 +6,4 @@ source /opt/ros/lyrical/setup.bash
 #  2. ~/.local/bin/colcon (old pip install) shadows /usr/bin/colcon -> use the apt one.
 alias colcon=/usr/bin/colcon
 export COLCON_DEFAULTS_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/colcon_defaults.yaml"
-[ -f "$(dirname "${BASH_SOURCE[0]}")/install/setup.bash" ] && source "$(dirname "${BASH_SOURCE[0]}")/install/setup.bash"
+if [ -f "$(dirname "${BASH_SOURCE[0]}")/install/setup.bash" ]; then source "$(dirname "${BASH_SOURCE[0]}")/install/setup.bash"; fi

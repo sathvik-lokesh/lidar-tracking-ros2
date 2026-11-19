@@ -1,0 +1,3 @@
+# Converter env (.venv): system python + ROS 2 Lyrical python packages, numpy from the system.
+#   /usr/bin/python3 -m venv --system-site-packages .venv && .venv/bin/pip install -r requirements-bag.txt
+pyarrow>=26

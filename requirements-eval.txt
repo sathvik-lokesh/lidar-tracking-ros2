@@ -1,0 +1,6 @@
+# Scoring env (.venv-eval): av2 0.3.6 has wheels only up to CPython 3.12, so this is a separate venv.
+#   uv venv -p 3.12 .venv-eval
+#   uv pip install --python .venv-eval/bin/python torch --index-url https://download.pytorch.org/whl/cpu
+#   uv pip install --python .venv-eval/bin/python -r requirements-eval.txt
+av2==0.3.6
+trackeval @ git+https://github.com/JonathonLuiten/TrackEval
