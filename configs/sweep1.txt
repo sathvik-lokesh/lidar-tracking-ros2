@@ -1,0 +1,21 @@
+# base: tracker=kf min_hits=3 cluster_method=1 (dev HOTA 0.304)
+base
+h_min03    min_box_height_m=0.3
+h_min05    min_box_height_m=0.5
+w_min02    min_box_width_m=0.2
+w_min03    min_box_width_m=0.3
+clr_08     max_clearance_m=0.8
+clr_12     max_clearance_m=1.2
+cells8     min_cluster_points=8
+cells12    min_cluster_points=12
+tol07      cluster_tolerance_m=0.7
+tol035     cluster_tolerance_m=0.35
+cell02     voxel_m=0.2
+cell01     voxel_m=0.1
+hits2      min_hits=2
+hits5      min_hits=5
+miss4      max_misses=4
+gate3      gate_m=3.0
+gate15     gate_m=1.5
+raw_out    output_filtered=0
+acc1       accel_std=1.0

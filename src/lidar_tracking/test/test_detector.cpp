@@ -78,6 +78,23 @@ TEST(Detector, FindsCarAndPedestrianOnSlope)
   EXPECT_LT(std::hypot(ped->cx + 10.0, ped->cy + 6.0), 0.15);
 }
 
+TEST(Detector, GridMethodFindsCarAndPedestrianOnSlope)
+{
+  auto pts = sloped_ground();
+  add_block(pts, 15.f, 2.f, 4.4f, 1.8f, 1.5f);
+  add_block(pts, -10.f, -6.f, 0.5f, 0.5f, 1.7f);
+  lidar_tracking::DetectorParams p;
+  p.cluster_method = 1;
+  Detector det(p);
+  const auto boxes = det.detect(pts);
+  ASSERT_EQ(boxes.size(), 2u);
+  const Box * car = nearest(boxes, 15.0, 2.0);
+  EXPECT_LT(std::hypot(car->cx - 15.0, car->cy - 2.0), 0.15);
+  EXPECT_NEAR(car->length, 4.4, 0.3);
+  const Box * ped = nearest(boxes, -10.0, -6.0);
+  EXPECT_LT(std::hypot(ped->cx + 10.0, ped->cy + 6.0), 0.15);
+}
+
 TEST(Detector, RangeCropDropsFarObjects)
 {
   auto pts = sloped_ground();

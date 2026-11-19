@@ -27,6 +27,8 @@ struct Box
   double height{0.0};
   double yaw{0.0};
   int num_points{0};
+  // Height of the box bottom above the local ground estimate (detector output; 0 if unknown).
+  double clearance{0.0};
 };
 
 struct DetectorParams
@@ -48,6 +50,10 @@ struct DetectorParams
   // Euclidean clustering. In 2D mode z is ignored, so vertical gaps between lidar
   // beams on distant objects do not split them.
   bool cluster_2d{true};
+  // 0 = PCL 3D voxel grid + KD-tree Euclidean clustering (2D if cluster_2d).
+  // 1 = BEV grid connected components (grid_cluster.hpp): cell size = voxel_m,
+  //     min/max_cluster_points count occupied cells. Always 2D.
+  int cluster_method{0};
   double cluster_tolerance_m{0.5};
   int min_cluster_points{5};
   int max_cluster_points{30000};
@@ -56,6 +62,8 @@ struct DetectorParams
   double max_box_length_m{20.0};
   double max_box_area_m2{60.0};
   double min_box_height_m{0.0};
+  double max_clearance_m{1e9};  // drop boxes floating higher than this above ground (off by default)
+  double min_box_width_m{0.0};  // drop boxes thinner than this (off by default)
 };
 
 struct StageTimings

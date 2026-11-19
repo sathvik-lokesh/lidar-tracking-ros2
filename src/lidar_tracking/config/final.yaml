@@ -1,0 +1,10 @@
+# Frozen configuration (dev sweeps 2026-11-20, see configs/final.txt at the repo root).
+lidar_tracker:
+  ros__parameters:
+    cluster_method: 1
+    cluster_tolerance_m: 0.7
+    min_cluster_points: 12
+    min_box_width_m: 0.3
+    min_box_height_m: 0.5
+    tracker: kf
+    min_hits: 3

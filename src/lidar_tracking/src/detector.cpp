@@ -12,6 +12,7 @@
 #include <limits>
 
 #include "lidar_tracking/box_fit.hpp"
+#include "lidar_tracking/grid_cluster.hpp"
 
 namespace lidar_tracking
 {
@@ -73,6 +74,9 @@ std::vector<Point> Detector::remove_ground(const std::vector<Point> & cloud) con
     }
   }
 
+  ground_ = ground;
+  ground_n_ = n;
+
   // 3. Keep points in the band (ground + clearance, ground + max_height].
   std::vector<Point> out;
   out.reserve(cloud.size() / 2);
@@ -95,8 +99,64 @@ std::vector<Box> Detector::detect(const std::vector<Point> & cloud, StageTimings
   t.ground_ms = ms_since(t0);
   t.n_nonground = static_cast<int>(above.size());
 
-  // Voxel grid in 3D. The centroid of each voxel stands in for its points.
+  if (params_.cluster_method == 1) {
+    detect_grid(above, t);
+  } else {
+    detect_pcl(above, t);
+  }
+  t.total_ms = ms_since(t_start);
+  if (timings) {*timings = t;}
+  return std::move(t_boxes_);
+}
+
+void Detector::detect_grid(const std::vector<Point> & above, StageTimings & t)
+{
+  t_boxes_.clear();
+  auto t0 = Clock::now();
+  const auto clusters = grid_clusters(
+    above, params_.voxel_m, params_.cluster_tolerance_m, params_.min_cluster_points, params_.max_cluster_points);
+  t.cluster_ms = ms_since(t0);
+  t.n_clusters = static_cast<int>(clusters.size());
   t0 = Clock::now();
+  std::vector<Point> members;
+  for (const auto & cl : clusters) {
+    members.clear();
+    for (const auto & c : cl) {
+      members.push_back({static_cast<float>(c.cx), static_cast<float>(c.cy), c.zmin, 0.f});
+      members.push_back({static_cast<float>(c.cx), static_cast<float>(c.cy), c.zmax, 0.f});
+    }
+    Box b = fit_min_area_box(members);
+    b.num_points = static_cast<int>(cl.size());
+    if (keep_box(b)) {t_boxes_.push_back(b);}
+  }
+  t.fit_ms = ms_since(t0);
+  t.n_boxes = static_cast<int>(t_boxes_.size());
+}
+
+double Detector::ground_at(double x, double y) const
+{
+  const double R = params_.max_range_m, cell = params_.ground_cell_m;
+  if (ground_n_ == 0) {return std::numeric_limits<double>::quiet_NaN();}
+  const int i = std::clamp(static_cast<int>((x + R) / cell), 0, ground_n_ - 1);
+  const int j = std::clamp(static_cast<int>((y + R) / cell), 0, ground_n_ - 1);
+  const float g = ground_[static_cast<size_t>(i) * ground_n_ + j];
+  return std::isfinite(g) ? g : std::numeric_limits<double>::quiet_NaN();
+}
+
+bool Detector::keep_box(Box & b) const
+{
+  const double g = ground_at(b.cx, b.cy);
+  b.clearance = std::isfinite(g) ? (b.cz - 0.5 * b.height) - g : 0.0;
+  return b.length <= params_.max_box_length_m && b.length * b.width <= params_.max_box_area_m2 &&
+         b.height >= params_.min_box_height_m && b.width >= params_.min_box_width_m &&
+         b.clearance <= params_.max_clearance_m;
+}
+
+void Detector::detect_pcl(const std::vector<Point> & above, StageTimings & t)
+{
+  t_boxes_.clear();
+  // Voxel grid in 3D. The centroid of each voxel stands in for its points.
+  auto t0 = Clock::now();
   pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
   pc->reserve(above.size());
   for (const auto & p : above) {pc->emplace_back(p.x, p.y, p.z);}
@@ -145,16 +205,11 @@ std::vector<Box> Detector::detect(const std::vector<Point> & cloud, StageTimings
       members.push_back({p.x, p.y, p.z, 0.f});
     }
     Box b = fit_min_area_box(members);
-    if (b.length > params_.max_box_length_m) {continue;}
-    if (b.length * b.width > params_.max_box_area_m2) {continue;}
-    if (b.height < params_.min_box_height_m) {continue;}
-    boxes.push_back(b);
+    if (keep_box(b)) {boxes.push_back(b);}
   }
   t.fit_ms = ms_since(t0);
   t.n_boxes = static_cast<int>(boxes.size());
-  t.total_ms = ms_since(t_start);
-  if (timings) {*timings = t;}
-  return boxes;
+  t_boxes_ = std::move(boxes);
 }
 
 }  // namespace lidar_tracking

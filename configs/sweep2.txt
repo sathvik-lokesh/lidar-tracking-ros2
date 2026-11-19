@@ -1,0 +1,10 @@
+# base: tracker=kf min_hits=3 cluster_method=1 ; combining sweep1 winners
+c12_w03                 min_cluster_points=12 min_box_width_m=0.3
+c12_w03_h05             min_cluster_points=12 min_box_width_m=0.3 min_box_height_m=0.5
+c12_w03_h05_t07         min_cluster_points=12 min_box_width_m=0.3 min_box_height_m=0.5 cluster_tolerance_m=0.7
+c12_w03_h05_t07_g15     min_cluster_points=12 min_box_width_m=0.3 min_box_height_m=0.5 cluster_tolerance_m=0.7 gate_m=1.5
+c12_w03_h05_t07_hit5    min_cluster_points=12 min_box_width_m=0.3 min_box_height_m=0.5 cluster_tolerance_m=0.7 min_hits=5
+c16_w03_h05_t07         min_cluster_points=16 min_box_width_m=0.3 min_box_height_m=0.5 cluster_tolerance_m=0.7
+c20_w03_h05_t07         min_cluster_points=20 min_box_width_m=0.3 min_box_height_m=0.5 cluster_tolerance_m=0.7
+c12_w04_h05_t07         min_cluster_points=12 min_box_width_m=0.4 min_box_height_m=0.5 cluster_tolerance_m=0.7
+c12_w03_h05_t07_cell02  min_cluster_points=12 min_box_width_m=0.3 min_box_height_m=0.5 cluster_tolerance_m=0.7 voxel_m=0.2

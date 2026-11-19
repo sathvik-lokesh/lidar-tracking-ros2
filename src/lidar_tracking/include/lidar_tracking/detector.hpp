@@ -28,7 +28,15 @@ public:
   const DetectorParams & params() const {return params_;}
 
 private:
+  void detect_pcl(const std::vector<Point> & above, StageTimings & t);
+  void detect_grid(const std::vector<Point> & above, StageTimings & t);
+  bool keep_box(Box & b) const;  // also fills b.clearance
+  double ground_at(double x, double y) const;
+
   struct Impl;
+  std::vector<Box> t_boxes_;  // output of the active detect_* stage
+  mutable std::vector<float> ground_;  // last ground grid from remove_ground()
+  mutable int ground_n_{0};
   DetectorParams params_;
   std::unique_ptr<Impl> impl_;
 };

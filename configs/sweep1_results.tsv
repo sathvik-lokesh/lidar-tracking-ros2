@@ -1,0 +1,21 @@
+name	HOTA	DetA	AssA	DetRe	DetPr	IDSW	params
+base	0.3038	0.1861	0.5032	0.4977	0.2220	686	tracker=kf min_hits=3 cluster_method=1
+h_min03	0.3184	0.2034	0.5061	0.4879	0.2497	595	tracker=kf min_hits=3 cluster_method=1 min_box_height_m=0.3
+h_min05	0.3194	0.2035	0.5086	0.4730	0.2542	555	tracker=kf min_hits=3 cluster_method=1 min_box_height_m=0.5
+w_min02	0.3211	0.2095	0.4984	0.4746	0.2623	625	tracker=kf min_hits=3 cluster_method=1 min_box_width_m=0.2
+w_min03	0.3322	0.2219	0.5041	0.4435	0.2937	535	tracker=kf min_hits=3 cluster_method=1 min_box_width_m=0.3
+clr_08	0.3038	0.1922	0.4869	0.4564	0.2409	589	tracker=kf min_hits=3 cluster_method=1 max_clearance_m=0.8
+clr_12	0.3084	0.1940	0.4977	0.4821	0.2370	660	tracker=kf min_hits=3 cluster_method=1 max_clearance_m=1.2
+cells8	0.3217	0.2060	0.5088	0.4646	0.2600	519	tracker=kf min_hits=3 cluster_method=1 min_cluster_points=8
+cells12	0.3358	0.2199	0.5194	0.4241	0.2994	399	tracker=kf min_hits=3 cluster_method=1 min_cluster_points=12
+tol07	0.3200	0.2002	0.5187	0.4686	0.2501	598	tracker=kf min_hits=3 cluster_method=1 cluster_tolerance_m=0.7
+tol035	0.2798	0.1671	0.4757	0.5098	0.1936	894	tracker=kf min_hits=3 cluster_method=1 cluster_tolerance_m=0.35
+cell02	0.3150	0.1982	0.5078	0.4795	0.2437	623	tracker=kf min_hits=3 cluster_method=1 voxel_m=0.2
+cell01	0.2903	0.1741	0.4920	0.5154	0.2023	771	tracker=kf min_hits=3 cluster_method=1 voxel_m=0.1
+hits2	0.2979	0.1800	0.5005	0.5106	0.2110	840	tracker=kf min_hits=3 cluster_method=1 min_hits=2
+hits5	0.3107	0.1935	0.5062	0.4728	0.2387	518	tracker=kf min_hits=3 cluster_method=1 min_hits=5
+miss4	0.3046	0.1835	0.5132	0.5035	0.2173	653	tracker=kf min_hits=3 cluster_method=1 max_misses=4
+gate3	0.2927	0.1804	0.4829	0.4976	0.2136	826	tracker=kf min_hits=3 cluster_method=1 gate_m=3.0
+gate15	0.3067	0.1900	0.5025	0.4947	0.2283	682	tracker=kf min_hits=3 cluster_method=1 gate_m=1.5
+raw_out	0.2997	0.1850	0.4910	0.4957	0.2212	831	tracker=kf min_hits=3 cluster_method=1 output_filtered=0
+acc1	0.3037	0.1853	0.5057	0.4954	0.2209	640	tracker=kf min_hits=3 cluster_method=1 accel_std=1.0
