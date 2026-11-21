@@ -6,6 +6,10 @@ The algorithms are textbook on purpose. The work went into measuring them honest
 
 **Headline (test split, 10 logs, 46,862 evaluated ground-truth boxes):** HOTA **0.304**, at 5.4 ms per frame mean on one CPU thread. No learned components.
 
+![Tracks in RViz on Argoverse 2 test log 1f434d15](docs/demo.gif)
+
+*Live pipeline in RViz on test log `1f434d15`, real time (15.5 s). Filled boxes are tracks, coloured and labelled by track id; green wireframes are the ground-truth boxes. Rendered from Argoverse 2 data, CC BY-NC-SA 4.0.*
+
 ## Pipeline
 
 ```mermaid
@@ -160,8 +164,8 @@ scripts/run_all.sh test final_test $(grep -v '^#' configs/final.txt)
 python3 -P scripts/make_results.py && python3 -P scripts/verify_readme_numbers.py
 ```
 
-Live: `ros2 launch lidar_tracking pipeline.launch.py` and, in a second terminal, `ros2 bag play data/bags/<log>`.
+Live: `ros2 launch lidar_tracking pipeline.launch.py` and, in a second terminal, `ros2 bag play data/bags/<log> --delay 2`. To watch it, also run `python3 -P scripts/tracks_to_markers.py` (RViz has no display for `vision_msgs` boxes, so this republishes tracks and ground truth as markers) and `rviz2 -d rviz/pipeline.rviz`.
 
 ## Data and licence
 
-Code: MIT. Argoverse 2 data is licensed CC BY-NC-SA 4.0 and is not included or redistributed; `scripts/fetch_av2.py` downloads it from the public bucket.
+Code: MIT. Argoverse 2 data is licensed CC BY-NC-SA 4.0 and is not included or redistributed (the only derived material is `docs/demo.gif`, under the same licence); `scripts/fetch_av2.py` downloads it from the public bucket.
