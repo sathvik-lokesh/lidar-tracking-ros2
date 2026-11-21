@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container: ros:lyrical-ros-base
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apt-get update
+          rosdep update --rosdistro lyrical
+          rosdep install --from-paths src --ignore-src -y --rosdistro lyrical
+      - name: Build
+        run: |
+          source /opt/ros/lyrical/setup.bash
+          export COLCON_DEFAULTS_FILE=$PWD/colcon_defaults.yaml
+          colcon build
+      - name: Test
+        run: |
+          source /opt/ros/lyrical/setup.bash
+          export COLCON_DEFAULTS_FILE=$PWD/colcon_defaults.yaml
+          colcon test --event-handlers console_direct-
+          colcon test-result --verbose
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t lidar-tracking-ros2 .
